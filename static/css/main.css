@@ -1,0 +1,33 @@
+#hr-line {
+	width:100%;
+	text-align:left;
+	margin-left:0
+}
+
+#download-btn {
+	display: none;
+}
+
+.modal {
+	display: none;
+	position: fixed;
+	z-index: 1000;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background: rgba(179, 179, 179, 0.5)
+							url('http://i.imgur.com/RB7FxT1.gif')
+							50% 50%
+							no-repeat;
+	}
+
+body.loading .modal {
+	overflow: hidden;
+}
+
+
+body.loading .modal {
+	display: block;
+}
+
