@@ -1,5 +1,7 @@
 FROM python:3.7.9-slim-buster
 
+ARG UNAME
+
 ENV TZ America/Los_Angeles
 
 ENV PYTHONDONTWRITEBYTECODE 1
