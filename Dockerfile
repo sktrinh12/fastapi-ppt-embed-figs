@@ -18,7 +18,8 @@ RUN useradd $UNAME \
 
 ENV HOME /home/$UNAME
 ENV APP_HOME /home/$UNAME/app
-RUN mkdir -p $APP_HOME
+RUN mkdir -p $APP_HOME/exports \
+	&& mkdir -p $APP_HOME/uploads
 WORKDIR $APP_HOME
 EXPOSE 22
 EXPOSE 8200
