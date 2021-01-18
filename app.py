@@ -71,4 +71,4 @@ async def perform_ppt_populate(subtext: str = Form(...), platenum: str = Form(..
 
 
 if __name__ == "__main__":
-    uvicorn.run('fastapi_test:app', port=1338, host='0.0.0.0', reload=True)
+    uvicorn.run('app:app', port=8200, host='0.0.0.0', reload=True)
