@@ -45,27 +45,29 @@ def make_table_content(stats_dct):
     table_content[2] = ['80'] + [f'{v:.3g}' for v in calc_thresCI(80, stats_dct)]
     return table_content
 
-def update_dct_props(dct_props, table_content):
+def update_dct_props(dct_props, table_content, rm_si_sn):
     dct_props['mfi_v_time']['left_spacing'] = Cm(20)
     dct_props['pos_v_conc']['slide_number'] = 2
     dct_props['pct_4c_ref']['slide_number'] = 2
     dct_props['pct_4c_ref']['left_spacing'] = Cm(20)
-    dct_props['stain_index']['slide_number'] = 3
-    dct_props['signal_noise']['left_spacing'] = Cm(20)
-    dct_props['signal_noise']['slide_number'] = 3
+    # print(f'rm_si_sn: {rm_si_sn}')
+    if rm_si_sn == False:
+        dct_props['stain_index']['slide_number'] = 3
+        dct_props['signal_noise']['left_spacing'] = Cm(20)
+        dct_props['signal_noise']['slide_number'] = 3
     dct_props['regression']['height'] = None
     dct_props['regression']['width'] = None
     dct_props['regression']['top_spacing'] = Cm(2)
-    dct_props['regression']['slide_number'] = 4
+    dct_props['regression']['slide_number'] = 3 if rm_si_sn else 4
     dct_props['regression']['table_cell'] = table_content
-    dct_props['histogram']['slide_number'] = 5
+    dct_props['histogram']['slide_number'] = 4 if rm_si_sn else 5
     dct_props['histogram']['left_spacing'] = -Cm(0.5)
     dct_props['histogram']['top_spacing'] = Cm(5.75)
     dct_props['histogram']['width'] = Cm(34)
     dct_props['histogram']['height'] = None
     dct_props['scatter']['width'] = Cm(16)
     dct_props['scatter']['height'] = Cm(18)
-    dct_props['scatter']['slide_number'] = 6
+    dct_props['scatter']['slide_number'] = 5 if rm_si_sn else 6
     dct_props['scatter']['top_spacing'] = Cm(1.1)
     dct_props['scatter']['left_spacing'] = Cm(11)
     return dct_props
