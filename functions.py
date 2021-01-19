@@ -10,8 +10,10 @@ def save_file_to_disk(uploaded_file, uploaddir):
 
 def process_stats_file(csv_file, uploaddir, exportdir):
     rename_histo_scatter_imgs(uploaddir)
-    df = tidy_data(os.path.join(uploaddir, csv_file))
-    meta_dct = generate_meta_dct()
+    df, rm_si_sn = tidy_data(os.path.join(uploaddir, csv_file))
+    # print(rm_si_sn)
+    meta_dct = generate_meta_dct(rm_si_sn)
+    # print(f'meta dict: {meta_dct.keys()}')
     # stats plots
     for plot_type in meta_dct.keys():
         create_stats_plot(df, meta_dct, plot_type, exportdir)
@@ -29,25 +31,34 @@ def process_stats_file(csv_file, uploaddir, exportdir):
 def embed_ppt_slides(infile, outfile, plot_types_list, stats_dct, cwd, timestamp):
     dct_props = make_dct_props(plot_types_list, cwd, timestamp)
     table_content = make_table_content(stats_dct)
-    dct_props = update_dct_props(dct_props, table_content)
-    print(dct_props.keys())
+    infile = os.path.join(cwd, infile)
+    prs = Presentation(infile)
+    rm_si_sn = False
+    if 'signal_noise' and 'stain_index' not in plot_types_list:
+        rm_si_sn = True
+        # remove the 4th slide (stain index & signal-to-noise)
+        print('removing stain index & signal noise slide')
+        rId = prs.slides._sldIdLst[3].rId
+        prs.part.drop_rel(rId)
+        del prs.slides._sldIdLst[3]
+
+    dct_props = update_dct_props(dct_props, table_content, rm_si_sn)
     exportdir = os.path.join(cwd, "exports")
-    first_run = True
     outfile = os.path.join(exportdir, stats_dct['timestamp'], outfile)
+    # save outfile even if there is SN/SI or not
+    prs.save(outfile)
+    # open outfile now since it is most up-to-date
+    prs = Presentation(outfile)
+    # get number of slides for bottom function
+    nbr_slides = len(prs.slides)
     for plot_type in dct_props.keys():
-        if first_run:
-            # the powerpoint blank template
-            first_run = False
-            file = os.path.join(cwd, infile)
-        else:
-            file = outfile
-        print(file)
-        insert_figure(file, outfile, dct_props[plot_type])
+        insert_figure(outfile, outfile, dct_props[plot_type])
+        print(outfile)
     # add regression table
     insert_regr_table(outfile, outfile, dct_props['regression'])
     # change plate number on first slide
     change_plate_nbr(outfile, outfile, stats_dct['platenum'])
     # add subtext
-    for slide in range(1, 6):
+    for slide in range(1, nbr_slides):
         change_single_info_content(outfile, outfile, slide, stats_dct['subtext'])
     print('Completed inserting figues and tables into powerpoint slides')
