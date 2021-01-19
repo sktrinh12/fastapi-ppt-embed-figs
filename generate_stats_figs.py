@@ -16,7 +16,7 @@ def calc_pct4C(ref, pos):
     return (pos/ref)*100
 
 
-def generate_meta_dct():
+def generate_meta_dct(rm_si_sn):
     dct = {'mfi_v_conc' :
                 {'title': 'MFI vs. Concentration', 'ylim_label': 'median_pos',
                  'ylabel': 'MFI', 'xlabel':'Concentration'},
@@ -36,6 +36,9 @@ def generate_meta_dct():
                 {'title': 'Signal/Noise', 'ylim_label': 'signal_noise',
                  'ylabel': 'S/N', 'xlabel': 'Time'},
            }
+    if rm_si_sn:
+        dct.pop('signal_noise', None)
+        dct.pop('stain_index', None)
     return dct
 
 def colnames():
@@ -72,15 +75,19 @@ def tidy_data(csv_file):
     prepare for plotting
     """
 
+    rm_si_sn = True
     df = pd.read_csv(csv_file)
     df.drop(axis=1, labels=['Unnamed: 7'], inplace=True)
     # set column names
     df.columns = colnames()
     # remove mean and SD rows
     df = df.iloc[:len(df)-2, :]
-    df = add_sn_si(df)
+    if (~df['rsd'].isnull().any() and ~df['median_pos'].isnull().any()):
+        df = add_sn_si(df)
+        rm_si_sn = False
     # convert to int32 dtype
     df['concentration'] = df['concentration'].astype({'concentration': 'int32'})
+    df = category_set(df)
     # sort on concnetration first then condition to calc the 4C ref MFI
     df = df.sort_values(['concentration','condition'])
     ref_mfis = produce_ref_mfi_list(df)
@@ -88,7 +95,9 @@ def tidy_data(csv_file):
     df['pct4C'] = [calc_pct4C(a,b) for a,b in zip(ref_mfis, df['median_pos'])]
     # ensure the order
     df = df.sort_values(["condition", "concentration"]).groupby('condition').head(8)
-    return df
+    # print()
+    # print(df.head(2))
+    return df, rm_si_sn
 
 
 def create_stats_plot(df, meta_dct, plot_type, wd):
